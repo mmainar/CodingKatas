@@ -4,17 +4,17 @@ namespace SudokuSolver
 {
     class Program
     {
-        static int BLANK = 0;
-        static int ONES = 0x3fe; 	// Binary 1111111110
+        static int BLANK = 0; // Square is empty
+        static int ONES = 0x3fe; 	// Binary 1111111110 (representing numbers [1..9])
 
         static int[] InBlock, InRow, InCol;       
         static int[] Entry;	// Records entries 1-9 in the grid, as the corresponding bit set to 1
         static int[] Block, Row, Col;	// Each int is a 9-bit array
 
-        static int SeqPtr = 0;
+        static int SeqPtr;
         static int[] Sequence;
 
-        static int Count = 0;
+        static int Count;
         static int[] LevelCount;
 
         static int Main(string[] args)
@@ -58,9 +58,13 @@ namespace SudokuSolver
             {
                 Block[i] = Row[i] = Col[i] = ONES;
             }
+            Console.WriteLine("Arrays initialised");
 
             ConsoleInput();
+
+            SeqPtr = 0; Count = 0;
             Place(SeqPtr);
+
             Console.WriteLine("\n\nTotal Count = %d\n", Count);
 
             return 0;
@@ -156,8 +160,11 @@ namespace SudokuSolver
             return nextSeq;
         }
 
+        // Runs main Backtracking search
         static void Place(int S)
         {
+            // Count levels of recursion on this square 
+            // and total levels of recursion
             LevelCount[S]++;
             Count++;
 
@@ -172,6 +179,7 @@ namespace SudokuSolver
             int S2 = NextSeq(S);
             SwapSeqEntries(S, S2);
 
+            // Get tue value of the Square/Cell at this min fanout
             int Square = Sequence[S];
 
             // Get Block, Row and Col indices for the square.
