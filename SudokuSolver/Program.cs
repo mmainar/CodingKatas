@@ -60,12 +60,16 @@ namespace SudokuSolver
             }
             Console.WriteLine("Arrays initialised");
 
-            ConsoleInput();
 
             SeqPtr = 0; Count = 0;
+            ConsoleInput();
+
+            Console.WriteLine("Starting at SeqPtr {0}", SeqPtr);
             Place(SeqPtr);
 
-            Console.WriteLine("\n\nTotal Count = %d\n", Count);
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("Total Count = {0}", Count);
 
             return 0;
         }
@@ -82,10 +86,6 @@ namespace SudokuSolver
                      if (Char.IsDigit(ch))
                      {
                          InitEntry(row, col, ch - '0');
-                     }
-                     else
-                     {
-                         throw new Exception("Invalid input");
                      }
                  }
              }
@@ -110,7 +110,8 @@ namespace SudokuSolver
             Col[InCol[Square]] &= ~valbit; // Simpler Col[col] &= ~valbit;
             Row[InRow[Square]] &= ~valbit; // Simpler Row[row] &= ~valbit;
 
-            // Not very sure yet what Sequencde is used for
+            // Not very sure yet what SeqPtr is used for
+            // This is sorting the seq array by the square numbers that we'll try to solve
             int SeqPtr2 = SeqPtr;
             while (SeqPtr2 < 81 && Sequence[SeqPtr2] != Square)
             {
@@ -131,8 +132,8 @@ namespace SudokuSolver
         // Choose the next cell to guess which minimises the fanout
         static int NextSeq(int S)
         {
-            int nextSeq = S;
-            int MinBitCount = 100;
+            int nextSeq = 0;
+            int MinBitCount = 100; // will always be less than this
 
             for (int T = S; T < 81; T++)
             {
@@ -143,13 +144,13 @@ namespace SudokuSolver
 
                 // Count the number of bits set to 1 on Possibles
                 int BitCount = 0;
-                while (Possibles > 0)
+                while (Possibles != 0)
                 {
                     Possibles &= ~(Possibles & -Possibles);
                     BitCount++;
                 }
 
-                // Get the square with the min possible numbers
+                // Get the square/cell with the min possible numbers
                 if (BitCount < MinBitCount)
                 {
                     MinBitCount = BitCount;
@@ -163,17 +164,17 @@ namespace SudokuSolver
         // Runs main Backtracking search
         static void Place(int S)
         {
-            // Count levels of recursion on this square 
-            // and total levels of recursion
-            LevelCount[S]++;
-            Count++;
-
             if (S >= 81)
             {
                 // All the squares have been placed (9x9)
                 Succeed();
                 return;
             }
+
+            // Count levels of recursion on this square 
+            // and total levels of recursion
+            LevelCount[S]++;
+            Count++;
 
             // Get the next cell to guess which minimises the fanout
             int S2 = NextSeq(S);
@@ -188,7 +189,7 @@ namespace SudokuSolver
                     ColIndex = InCol[Square];
 
             int Possibles = Block[BlockIndex] & Row[RowIndex] & Col[ColIndex];
-            while (Possibles > 0)
+            while (Possibles != 0)
             {
                 //Gets the highest power of two that divides x 
                 int valbit = Possibles & (-Possibles); // Lowest 1 bit in Possibles
@@ -252,7 +253,10 @@ namespace SudokuSolver
                         for (int val = 1; val <= 9; val++)
                             if (valbit == (1 << val))
                             {
-                                ch = (char) val;
+                                if (!Char.TryParse(val.ToString(), out ch))
+                                {
+                                    throw new Exception(string.Format("Could not parse {0} to char", val));
+                                }
                                 break;
                             }
                     }
@@ -281,7 +285,7 @@ namespace SudokuSolver
                 int Seq = Sequence[S];
                 int row = Seq / 9 + 1; // + 1 since 0 based
                 int col = Seq % 9 + 1;
-                Console.WriteLine("({0}, {1}):{2} ", row, col, LevelCount[S]);
+                Console.Write("({0}, {1}):{2} ", row, col, LevelCount[S]);
                 if (i++ > 4)
                 {
                     Console.WriteLine();
