@@ -129,7 +129,7 @@ namespace SudokuSolver
             Sequence[S1] = temp;
         }
 
-        // Choose the next cell to guess which minimises the fanout
+        // Choose the next square/cell to guess which minimises the fanout
         static int NextSeq(int S)
         {
             int nextSeq = 0;
@@ -142,10 +142,12 @@ namespace SudokuSolver
                 // common for Block, Row and Col of this square
                 int Possibles = Block[InBlock[Square]] & Row[InRow[Square]] & Col[InCol[Square]];
 
-                // Count the number of bits set to 1 on Possibles
+                // Count the number of bits set to 1 on Possibles, i.e. the number of
+                // possible numbers at this moment on this Sudoku square or cell.
                 int BitCount = 0;
                 while (Possibles != 0)
                 {
+                    // (Possibles & -Possibles) returns the least significant set bit of Possibles
                     Possibles &= ~(Possibles & -Possibles);
                     BitCount++;
                 }
