@@ -1,1 +1,1 @@
-Coding katas
+Coding katas exercises
